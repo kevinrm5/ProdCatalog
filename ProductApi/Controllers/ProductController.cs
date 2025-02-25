@@ -2,6 +2,7 @@
 using ProductApi.Models;
 using ProductModel;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace ProductApi.Controllers
 {
@@ -15,18 +16,29 @@ namespace ProductApi.Controllers
             this.productRepository = productRepository;
         }
         [HttpGet]
-        public async Task<ActionResult> GetProducts()
+        public async Task<ActionResult> GetProducts(int page = 1, int pageSize = 10, string? productCode = null)
         {
             try
             {
-                var products = await productRepository.GetProducts();
+                var (items, totalCount) = await productRepository.GetProducts(page, pageSize, productCode);
 
-                if (products == null || !products.Any())
+                if (items == null || !items.Any())
                 {
                     return NotFound("No products found.");
                 }
 
-                return Ok(products);
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+                var response = new
+                {
+                    items,
+                    totalCount,
+                    totalPages,
+                    currentPage = page,
+                    pageSize
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

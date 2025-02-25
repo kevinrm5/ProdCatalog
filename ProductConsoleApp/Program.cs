@@ -1,100 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-
-class Program
+﻿using System.Net.Http.Json;
+using ProductConsoleApp.Helpers;
+using ProductModel;
+namespace ProductConsoleApp
 {
-    static async Task Main(string[] args)
+    public class Program
     {
-        if (args.Length == 0)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Usage: ProductManagementConsole <CSV_FILE_PATH>");
-            return;
+            if (args.Length == 0)
+            {
+                return;
+            }
+
+            string csvFilePath = args[0];
+
+            if (!File.Exists(csvFilePath))
+            {
+                Console.WriteLine($"Error: File '{csvFilePath}' not found.");
+                return;
+            }
+
+            List<ProductCategoryDto> products = ReadCsv(csvFilePath);
+
+            if (products.Count == 0)
+            {
+                Console.WriteLine("No valid products found in the CSV file.");
+                return;
+            }
+
+            Console.Write("Continue on error? (yes/no): ");
+            string userChoice = Console.ReadLine()?.Trim().ToLower();
+            bool continueOnError = userChoice == "yes";
+
+            await SendDataToApi(products, continueOnError);
         }
 
-        string csvFilePath = args[0];
-
-        if (!File.Exists(csvFilePath))
+        static async Task SendDataToApi(List<ProductCategoryDto> products, bool continueOnError)
         {
-            Console.WriteLine($"Error: File '{csvFilePath}' not found.");
-            return;
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:44352/");
+
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsJsonAsync("api/products-bulk", products);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Successfully added all products.");
+                    }
+                    else
+                    {
+                        string errorMsg = await response.Content.ReadAsStringAsync();
+                        Logger.LogError($"Failed to add products. Status: {response.StatusCode}, Error: {errorMsg}");
+
+                        if (!continueOnError)
+                        {
+                            Console.WriteLine("Stopping import due to error.");
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"Exception occurred: {ex.Message}");
+
+                    if (!continueOnError)
+                    {
+                        Console.WriteLine("Stopping import due to exception.");
+                        return;
+                    }
+                }
+            }
         }
 
-        List<Product> products = ReadCsv(csvFilePath);
-
-        if (products.Count == 0)
+        public static List<ProductCategoryDto> ReadCsv(string csvFilePath)
         {
-            Console.WriteLine("No valid products found in the CSV file.");
-            return;
-        }
+            var products = new List<ProductCategoryDto>();
+            var lines = File.ReadAllLines(csvFilePath).Skip(1);
 
-        await SendDataToApi(products);
-    }
-
-    static List<Product> ReadCsv(string filePath)
-    {
-        var products = new List<Product>();
-        try
-        {
-            var lines = File.ReadAllLines(filePath);
             foreach (var line in lines)
             {
                 var values = line.Split(',');
-                if (values.Length == 4)
-                {
-                    products.Add(new Product
-                    {
-                        ProductName = values[0],
-                        ProductCode = values[1],
-                        CategoryName = values[2],
-                        CategoryCode = values[3]
-                    });
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error reading CSV: {ex.Message}");
-        }
-        return products;
-    }
 
-    static async Task SendDataToApi(List<Product> products)
-    {
-        using (HttpClient client = new HttpClient())
-        {
-            client.BaseAddress = new Uri("https://localhost:44352/");
-
-            try
-            {
-                HttpResponseMessage response = await client.PostAsJsonAsync("api/products-bulk", products);
-
-                if (response.IsSuccessStatusCode)
+                if (values.Length != 4)
                 {
-                    Console.WriteLine("Successfully added all products.");
+                    Console.WriteLine($"Skipping invalid row: {line}");
+                    continue;
                 }
-                else
+
+                products.Add(new ProductCategoryDto
                 {
-                    string errorMsg = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Failed to add products. Status: {response.StatusCode}, Error: {errorMsg}");
-                }
+                    ProductName = values[0].Trim(),
+                    ProductCode = values[1].Trim(),
+                    CategoryName = values[2].Trim(),
+                    CategoryCode = values[3].Trim()
+                });
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception occurred: {ex.Message}");
-            }
+
+            return products;
         }
     }
-}
-
-class Product
-{
-    public string ProductName { get; set; }
-    public string ProductCode { get; set; }
-    public string CategoryName { get; set; }
-    public string CategoryCode { get; set; }
 }

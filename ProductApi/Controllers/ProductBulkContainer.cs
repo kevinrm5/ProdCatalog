@@ -26,38 +26,51 @@ namespace ProductApi.Controllers
             if (requestData == null || !requestData.Any())
                 return BadRequest("Invalid input data");
 
-            var products = new List<Product>();
-            var categories = new List<Category>();
+            var duplicateProductCodes = requestData
+                .GroupBy(p => p.ProductCode)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
 
-            foreach (var row in requestData)
+            var duplicateCategoryCodes = requestData
+                .GroupBy(c => c.CategoryCode)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateProductCodes.Any() || duplicateCategoryCodes.Any())
             {
-                var product = new Product
+                return BadRequest(new
+                {
+                    Message = "Duplicate codes found",
+                    DuplicateProductCodes = duplicateProductCodes,
+                    DuplicateCategoryCodes = duplicateCategoryCodes
+                });
+            }
+
+            var products = requestData
+                .Select(row => new Product
                 {
                     Code = row.ProductCode,
                     Name = row.ProductName,
                     CategoryCode = row.CategoryCode
-                };
+                })
+                .Distinct()
+                .ToList();
 
-                var category = new Category
+            var categories = requestData
+                .Select(row => new Category
                 {
                     Code = row.CategoryCode,
                     Name = row.CategoryName
-                };
+                })
+                .Distinct()
+                .ToList();
 
-                if (!products.Any(p => p.Code == product.Code))
-                    products.Add(product);
+            await _productRepository.BulkInsertProducts(products);
+            await _categoryRepository.BulkInsertCategories(categories);
 
-                if (!categories.Any(c => c.Code == category.Code))
-                    categories.Add(category);
-            }
-
-            if (products.Any())
-                await _productRepository.BulkInsertProducts(products);
-
-            if (categories.Any())
-                await _categoryRepository.BulkInsertCategories(categories);
-
-            return Ok(new { Message = "Bulk insert operation completed" });
+            return Ok(new { Message = "Bulk insert operation completed successfully" });
         }
     }
 }

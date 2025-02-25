@@ -48,9 +48,23 @@ namespace ProductApi.Models
                 .FirstOrDefaultAsync(e => e.Code == productCode);
         }
 
-        public async Task<IEnumerable<Product>> GetProducts()
+        public async Task<(IEnumerable<Product> Items, int TotalCount)> GetProducts(int page, int pageSize, string? productCode)
         {
-            return await appDbContext.Products.ToListAsync();
+            IQueryable<Product> query = appDbContext.Products;
+
+            if (!string.IsNullOrWhiteSpace(productCode))
+            {
+                query = query.Where(p => p.Code.Contains(productCode));
+            }
+
+            int totalCount = await query.CountAsync();
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (products, totalCount);
         }
 
         public async Task<Product?> UpdateProduct(Product product)

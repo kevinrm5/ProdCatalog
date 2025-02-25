@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ProductConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\projects\\ProductConsole\\TestExampleFile.csv"
+    }
+  }
+}
