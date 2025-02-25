@@ -7,7 +7,7 @@ This console application reads product data from a CSV file, processes it, and s
 
 ## 🛠️ Setup Instructions
 
-### **1⃣ Add the `TestExampleFile.csv` File**  
+### **1 Add the `TestExampleFile.csv` File**  
 Create a `TestExampleFile.csv` file in the **root directory** of the project with the following format:
 
 ```csv
@@ -34,7 +34,7 @@ Smartwatch,D018,Electronics,C001
 
 ---
 
-### **2⃣ Set the File Path in Command Line Arguments**  
+### **2 Set the File Path in Command Line Arguments**  
 1. In **Visual Studio**, go to **Project → Properties**.  
 2. Select **Debug**.  
 3. In the **Application Arguments** field, enter the path to your `TestExampleFile.csv` file, like this:
@@ -45,7 +45,7 @@ Smartwatch,D018,Electronics,C001
 
 ---
 
-### **3⃣ Run Database Migration**  
+### **3 Run Database Migration**  
 Before running the application, set up the database schema using **Entity Framework Core**.
 
 1. Open **Package Manager Console** in Visual Studio.
@@ -59,7 +59,7 @@ Before running the application, set up the database schema using **Entity Framew
 
 ---
 
-### **4⃣ Run the Application**  
+### **4 Run the Application**  
 Once everything is set up, **start the project**
 
 If successful, you will see:
@@ -69,7 +69,7 @@ Your data has been inserted successfully!
 
 ---
 
-### **5⃣ Run Unit Test Cases**  
+### **5 Run Unit Test Cases**  
 A test project (`ProductTestCases`) is included to verify the functionality of the application.
 
 1. **Start the application**.
