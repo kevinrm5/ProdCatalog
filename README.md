@@ -1,14 +1,14 @@
 # Product Management Console App  
 
 ## 📌 Overview  
-This console application reads product data from a CSV file, processes it, and sends it to an API for storage. It also handles database migrations and ensures the data is inserted correctly.
+This console application reads product data from a CSV file, processes it, and sends it to an API for storage. It also handles database migrations and ensures the data is inserted correctly. Additionally, a test project is included to run unit tests for the application's functionality.
 
 ---
 
 ## 🛠️ Setup Instructions
 
-### **1️⃣ Add the `test.csv` File**  
-Create a `test.csv` file in the **root directory** of the project with the following format:
+### **1⃣ Add the `TestExampleFile.csv` File**  
+Create a `TestExampleFile.csv` file in the **root directory** of the project with the following format:
 
 ```csv
 ProductName,ProductCode,CategoryName,CategoryCode
@@ -34,46 +34,54 @@ Smartwatch,D018,Electronics,C001
 
 ---
 
-### **2️⃣ Set the File Path in Command Line Arguments**  
+### **2⃣ Set the File Path in Command Line Arguments**  
 1. In **Visual Studio**, go to **Project → Properties**.  
 2. Select **Debug**.  
-3. In the **Application Arguments** field, enter the path to your `test.csv` file, like this:
+3. In the **Application Arguments** field, enter the path to your `TestExampleFile.csv` file, like this:
    ```
-   "C:\path\to\your\test.csv"
+   "C:\path\to\your\TestExampleFile.csv"
    ```
 4. Save the settings.
 
 ---
 
-### **3️⃣ Run Database Migration**  
+### **3⃣ Run Database Migration**  
 Before running the application, set up the database schema using **Entity Framework Core**.
 
 1. Open **Package Manager Console** in Visual Studio.
 2. Run the following command to create the migration:
-   ```powershell
    Add-Migration InitialCreate
-   ```
+   
 3. Apply the migration to the database:
-   ```powershell
    Update-Database
-   ```
+
 4. Your database schema is now created and ready for use.
 
 ---
 
-### **4️⃣ Run the Application**  
-Once everything is set up, **run the console application** using:
-```sh
-dotnet run "C:\path\to\your\test.csv"
-```
-or simply start the project in **Visual Studio**.
+### **4⃣ Run the Application**  
+Once everything is set up, **start the project**
 
 If successful, you will see:
 ```
-💪 Your data has been inserted successfully!
+Your data has been inserted successfully!
 ```
 
 ---
 
-## 🎯 **You're Now Ready to Use the Application! 🚀**  
+### **5⃣ Run Unit Test Cases**  
+A test project (`ProductTestCases`) is included to verify the functionality of the application.
 
+1. **Start the application**.
+2. Open the **Package Manager Console** in Visual Studio.
+3. Select **ProductTestCases** from the default project dropdown.
+4. Navigate to the test project directory:
+   cd ProductTestCases
+
+5. Run the test cases:
+   dotnet test
+
+If successful, you will see the test results in the console output.
+
+
+## 🎯 **You're Now Ready to Use and Test the Application! 🚀**  
